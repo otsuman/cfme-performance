@@ -37,8 +37,8 @@ INDEX_PREFIX = 'cfme-run'
 INDEXING_THRESHOLD = 3000
 
 # ES config
-host = "10.12.23.122"
-port = 9201
+host = "10.16.31.170"
+port = 9200
 auth = ('admin', 'admin')
 
 _op_type = 'create'
@@ -422,7 +422,7 @@ class CfmeResultsParser(object):
         metadata_dict['provider'] = scenario_metadata[1].split()[-1]
         memory_str = re.sub(r'(?i)^Version.*\n', '', groups[0])
         metadata_dict['total_memory'] = self.csv_sanitizer(
-            csv_contents=csv.DictReader(io.StringIO(memory_str)),
+            csv_contents=csv.DictReader(io.StringIO(unicode(memory_str))),
             type='summary')
         final_result = []
         for item in metadata_dict['total_memory']:
@@ -455,7 +455,7 @@ class CfmeResultsParser(object):
                 break
             count = count+1
             sanitized_data = self.csv_sanitizer(
-                csv_contents=csv.DictReader(io.StringIO(group)),
+                csv_contents=csv.DictReader(io.StringIO(unicode(group))),
                 type='summary')
             for item in sanitized_data:
                 datum = dict(

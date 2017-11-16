@@ -1,5 +1,5 @@
 """Runs Provisioning Workload."""
-from utils.appliance import clean_appliance
+from utils.appliance import clean_appliance, set_full_refresh_threshold
 from utils.appliance import get_server_roles_workload_provisioning
 from utils.appliance import set_server_roles_workload_provisioning
 from utils.appliance import set_server_roles_workload_provisioning_cleanup
@@ -11,7 +11,7 @@ from utils.providers import add_providers
 from utils.providers import delete_provisioned_vm
 from utils.providers import delete_provisioned_vms
 from utils.providers import provision_vm
-from utils.providers import get_template_guids
+from utils.providers import get_template_guids, get_provider_id, refresh_provider
 from utils.smem_memory_monitor import add_workload_quantifiers
 from utils.smem_memory_monitor import SmemMemoryMonitor
 from utils.smem_memory_monitor import test_ts
@@ -20,6 +20,8 @@ from utils.workloads import get_provisioning_scenarios
 from itertools import cycle
 import time
 import pytest
+
+FULL_REFRESH_THRESHOLD_DEFAULT = 100
 
 
 @pytest.mark.usefixtures('generate_version_files')
@@ -76,6 +78,16 @@ def test_provisioning(request, scenario):
     wait_for_miq_server_workers_started(poll_interval=2)
     set_server_roles_workload_provisioning(ssh_client)
     add_providers(scenario['providers'])
+    provider_id = get_provider_id(scenario['providers'][0])
+    refresh_provider(provider_id)
+    full_refresh_threshold_set = False
+    if 'full_refresh_threshold' in scenario:
+        if scenario['full_refresh_threshold'] != FULL_REFRESH_THRESHOLD_DEFAULT:
+            set_full_refresh_threshold(ssh_client, scenario['full_refresh_threshold'])
+            full_refresh_threshold_set = True
+    if not full_refresh_threshold_set:
+        logger.debug('Keeping full_refresh_threshold at default ({}).'.format(
+            FULL_REFRESH_THRESHOLD_DEFAULT))
     logger.info('Sleeping for Refresh: {}s'.format(scenario['refresh_sleep_time']))
     time.sleep(scenario['refresh_sleep_time'])
 
