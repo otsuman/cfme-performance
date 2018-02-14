@@ -54,7 +54,7 @@ def clean_appliance(ssh_client, dbsync_local_uninstall=True):
         ssh_client.run_command('service rh-postgresql94-postgresql restart')
         if dbsync_local_uninstall:
             ssh_client.run_rake_command('evm:dbsync:local_uninstall')
-    elif ver == '59' or ver == '58':
+    elif ver == '59' or ver == '58' or ver == '57':
         ssh_client.run_command('service rh-postgresql95-postgresql restart')
     else:
         raise Exception('Unable to set config: Unrecognized version of appliance')

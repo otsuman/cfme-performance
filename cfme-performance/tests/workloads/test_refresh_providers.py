@@ -29,7 +29,6 @@ def test_refresh_providers(request, scenario):
     ssh_client = SSHClient()
     logger.debug('Scenario: {}'.format(scenario['name']))
 
-    clean_appliance(ssh_client)
 
     quantifiers = {}
     scenario_data = {
@@ -58,9 +57,6 @@ def test_refresh_providers(request, scenario):
                                                   quantifiers, scenario_data))
     monitor_thread.start()
 
-    wait_for_miq_server_workers_started(poll_interval=2)
-    set_server_roles_workload_refresh_providers(ssh_client)
-    add_providers(scenario['providers'])
     id_list = get_all_provider_ids()
 
     # Variable amount of time for refresh workload
@@ -68,7 +64,7 @@ def test_refresh_providers(request, scenario):
     starttime = time.time()
     time_between_refresh = scenario['time_between_refresh']
     total_refreshed_providers = 0
-
+    all_refresh_times = []
     while ((time.time() - starttime) < total_time):
         start_refresh_time = time.time()
         refresh_providers_bulk(id_list)
@@ -76,6 +72,7 @@ def test_refresh_providers(request, scenario):
         iteration_time = time.time()
 
         refresh_time = round(iteration_time - start_refresh_time, 2)
+        all_refresh_times.append(refresh_time)
         elapsed_time = iteration_time - starttime
         logger.debug('Time to Queue Refreshes: {}'.format(refresh_time))
         logger.info('Time elapsed: {}/{}'.format(round(elapsed_time, 2), total_time))
@@ -90,7 +87,7 @@ def test_refresh_providers(request, scenario):
         else:
             logger.warn('Time to Queue Refreshes ({}) exceeded time between '
                         '({})'.format(refresh_time, time_between_refresh))
-
+    quantifiers['Avarage refresh time'] = sum(all_refresh_times) / float(len(all_refresh_times))
     quantifiers['Elapsed_Time'] = round(time.time() - starttime, 2)
     quantifiers['Queued_Provider_Refreshes'] = total_refreshed_providers
     logger.info('Test Ending...')

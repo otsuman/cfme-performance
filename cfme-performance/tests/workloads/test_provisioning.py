@@ -75,12 +75,9 @@ def test_provisioning(request, scenario):
 
     monitor_thread.start()
 
-    wait_for_miq_server_workers_started(poll_interval=2)
-    set_server_roles_workload_provisioning(ssh_client)
-    add_providers(scenario['providers'])
-    provider_id = get_provider_id(scenario['providers'][0])
-    refresh_provider(provider_id)
     full_refresh_threshold_set = False
+    logger.info('Sleeping for Refresh: {}s'.format(scenario['refresh_sleep_time']))
+    time.sleep(scenario['refresh_sleep_time'])
     if 'full_refresh_threshold' in scenario:
         if scenario['full_refresh_threshold'] != FULL_REFRESH_THRESHOLD_DEFAULT:
             set_full_refresh_threshold(ssh_client, scenario['full_refresh_threshold'])
@@ -88,8 +85,7 @@ def test_provisioning(request, scenario):
     if not full_refresh_threshold_set:
         logger.debug('Keeping full_refresh_threshold at default ({}).'.format(
             FULL_REFRESH_THRESHOLD_DEFAULT))
-    logger.info('Sleeping for Refresh: {}s'.format(scenario['refresh_sleep_time']))
-    time.sleep(scenario['refresh_sleep_time'])
+
 
     guid_list = get_template_guids(scenario['templates'])
     guid_cycle = cycle(guid_list)
@@ -111,6 +107,7 @@ def test_provisioning(request, scenario):
             vm_to_provision = '{}-provision-{}'.format(
                 test_ts, str(total_provisioned_vms).zfill(4))
             guid_to_provision, provider_name = next(guid_cycle)
+            provider_name = "qe-perf-" + provider_name
             provider_to_provision = cfme_performance['providers'][provider_name]
             provision_order.append((vm_to_provision, provider_name))
             provision_list.append((vm_to_provision, guid_to_provision,

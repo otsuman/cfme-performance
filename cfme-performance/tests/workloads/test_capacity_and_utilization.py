@@ -52,8 +52,6 @@ def test_workload_capacity_and_utilization(request, scenario):
     monitor_thread.start()
 
     wait_for_miq_server_workers_started(poll_interval=2)
-    set_server_roles_workload_cap_and_util(ssh_client)
-    add_providers(scenario['providers'])
     logger.info('Sleeping for Refresh: {}s'.format(scenario['refresh_sleep_time']))
     time.sleep(scenario['refresh_sleep_time'])
     set_cap_and_util_all_via_rails(ssh_client)
