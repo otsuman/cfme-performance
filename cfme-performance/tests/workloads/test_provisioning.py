@@ -108,7 +108,7 @@ def test_provisioning(request, scenario):
         for i in range(number_of_vms):
             total_provisioned_vms += 1
             provisioned_vms += 1
-            vm_to_provision = '{}-provision-{}'.format(
+            vm_to_provision = 'test-{}-prov-{}'.format(
                 test_ts, str(total_provisioned_vms).zfill(4))
             guid_to_provision, provider_name = next(guid_cycle)
             provider_to_provision = cfme_performance['providers'][provider_name]
